@@ -1,4 +1,6 @@
 {
   "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "file"
+  "editor.formatOnSaveMode": "file",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "auto-close-tag.fullMode": false
 }
