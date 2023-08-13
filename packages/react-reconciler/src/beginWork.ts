@@ -45,12 +45,15 @@ function updateHostComponent(wip: FiberNode) {
 	return wip.child;
 }
 
+// 构造子 fiber
 function reconcileChildren(wip: FiberNode, children?: ReactElementType) {
 	const current = wip.alternate;
 
 	if (current !== null) {
+		// update 或者 执行 unmount 时的 hostRootFiber
 		wip.child = reconcileChildFibers(wip, current?.child, children);
 	} else {
+		// mount 时的其他 fiber
 		wip.child = mountChildFibers(wip, null, children);
 	}
 }

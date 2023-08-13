@@ -1,17 +1,17 @@
 import { ReactElementType } from 'shared/ReactTypes';
-import { FiberNode, createFIberForElement } from './fiber';
+import { FiberNode, createFiberForElement } from './fiber';
 import { REACT_ELEMENT_TYPE } from 'shared/ReactSymbols';
 import { HostText } from './workTags';
 import { Placement } from './fiberFlags';
 
 function ChildReconciler(shouldTrackEffects: boolean) {
-	function reconcileSingleELement(
+	function reconcileSingleElement(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
 		element: ReactElementType
 	) {
 		// 根据 currentFiber 和 element 创建新的 fiber
-		const fiber = createFIberForElement(element);
+		const fiber = createFiberForElement(element);
 		fiber.return = returnFiber;
 		return fiber;
 	}
@@ -28,7 +28,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 
 	function placeSingleChild(fiber: FiberNode) {
 		if (shouldTrackEffects && fiber.alternate === null) {
-			fiber.flags != Placement;
+			fiber.flags |= Placement;
 		}
 		return fiber;
 	}
@@ -42,7 +42,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 			switch (newChild.$$typeof) {
 				case REACT_ELEMENT_TYPE: {
 					return placeSingleChild(
-						reconcileSingleELement(returnFiber, currentFIber, newChild)
+						reconcileSingleElement(returnFiber, currentFIber, newChild)
 					);
 				}
 				default: {

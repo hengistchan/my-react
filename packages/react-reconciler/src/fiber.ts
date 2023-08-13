@@ -105,7 +105,7 @@ export const createWorkInProgress = (
 	return wip;
 };
 
-export function createFIberForElement(element: ReactElementType) {
+export function createFiberForElement(element: ReactElementType) {
 	const { type, key, props } = element;
 	let fiberTag: WorkTag = FunctionComponent;
 
