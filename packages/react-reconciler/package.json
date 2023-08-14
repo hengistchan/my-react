@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "shared": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "workspace:*"
   }
 }
