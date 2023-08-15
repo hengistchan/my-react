@@ -28,10 +28,9 @@ export const beginWork = (wip: FiberNode) => {
 			if (__DEV__) {
 				console.error('Unknown fiber tag', wip.tag);
 			}
-			break;
+			return null;
 		}
 	}
-	return null;
 };
 
 function updateHostRoot(wip: FiberNode) {

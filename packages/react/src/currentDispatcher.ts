@@ -13,7 +13,9 @@ const currentDispatcher: { current: Dispatcher | null } = {
 export const resolveDispatcher = () => {
 	const dispatcher = currentDispatcher.current;
 	if (dispatcher === null) {
-		throw new Error('hooks only can use in FC');
+		console.error(
+			'Invalid hook call. Hooks can only be called inside of the body of a function component.'
+		);
 	}
 	return dispatcher;
 };

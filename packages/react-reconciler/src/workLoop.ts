@@ -2,7 +2,7 @@ import { beginWork } from './beginWork';
 import { commitMutationEffects } from './commitWork';
 import { completeWork } from './completeWork';
 import { FiberNode, FiberRootNode, createWorkInProgress } from './fiber';
-import { MutationMark, NoFlags } from './fiberFlags';
+import { MutationMask, NoFlags } from './fiberFlags';
 import { HostRoot } from './workTags';
 
 let workInProgress: FiberNode | null = null;
@@ -78,8 +78,8 @@ function commitRoot(root: FiberRootNode) {
 	// 判断是否存在 3 个子阶段需要执行的操作
 	// root flags root subTreeFlags
 	const subTreeHasEffects =
-		(finishedWork.subtreeFlags & MutationMark) !== NoFlags;
-	const rootHasEffects = (finishedWork.flags & MutationMark) !== NoFlags;
+		(finishedWork.subtreeFlags & MutationMask) !== NoFlags;
+	const rootHasEffects = (finishedWork.flags & MutationMask) !== NoFlags;
 
 	if (subTreeHasEffects || rootHasEffects) {
 		// 1. before mutation

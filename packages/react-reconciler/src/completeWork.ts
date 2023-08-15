@@ -11,7 +11,11 @@ import {
 	HostRoot,
 	HostText
 } from './workTags';
-import { NoFlags } from './fiberFlags';
+import { NoFlags, Update } from './fiberFlags';
+
+function markUpdate(fiber: FiberNode) {
+	fiber.flags |= Update;
+}
 
 export const completeWork = (wip: FiberNode) => {
 	const newProps = wip.pendingProps;
@@ -23,6 +27,7 @@ export const completeWork = (wip: FiberNode) => {
 			// 2. 将 DOM 插入到 DOM 树中
 			if (current !== null && wip.stateNode) {
 				// update
+				// markUpdate(wip);
 			} else {
 				const instance = createInstance(wip.type, newProps);
 				appendAllChildren(instance, wip);
@@ -32,7 +37,11 @@ export const completeWork = (wip: FiberNode) => {
 			return null;
 		case HostText:
 			if (current !== null && wip.stateNode) {
-				// update
+				const oldText = current.memoizedProps.content;
+				const newText = newProps.content;
+				if (oldText !== newText) {
+					markUpdate(wip);
+				}
 			} else {
 				const instance = createTextInstance(newProps.content);
 				wip.stateNode = instance;

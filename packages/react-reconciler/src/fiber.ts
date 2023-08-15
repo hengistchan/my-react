@@ -20,6 +20,7 @@ export class FiberNode {
 	memoizedProps: Props | null;
 	memoizedState: any;
 	updateQueue: UpdateQueue<unknown> | null;
+	deletions: FiberNode[] | null;
 
 	// 用于双缓冲，如果当前 fiberNode 是 current，则 alternate 指向 workInProgress，反之亦然
 	alternate: FiberNode | null;
@@ -58,6 +59,7 @@ export class FiberNode {
 		// 副作用
 		this.flags = NoFlags;
 		this.subtreeFlags = NoFlags;
+		this.deletions = null;
 	}
 }
 
@@ -94,6 +96,7 @@ export const createWorkInProgress = (
 		wip.pendingProps = pendingProps;
 		wip.flags = NoFlags;
 		wip.subtreeFlags = NoFlags;
+		wip.deletions = null;
 	}
 
 	wip.type = current.type;
