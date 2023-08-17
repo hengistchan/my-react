@@ -5,8 +5,7 @@ const Child = () => <h3>yuanbz shazi</h3>;
 
 export function App() {
 	const [num, dispatch] = useState(100);
-	window.setNum = dispatch;
-	return num === 3 ? <p>{num + 1000}</p> : <div>{num}</div>;
+	return <div onClick={() => dispatch(num + 1)}>{num}</div>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
