@@ -2,14 +2,14 @@ import {
 	Container,
 	appendInitialChild,
 	createInstance,
-	createTextInstance
+	createTextInstance,
 } from 'hostConfig';
 import { FiberNode } from './fiber';
 import {
 	FunctionComponent,
 	HostComponent,
 	HostRoot,
-	HostText
+	HostText,
 } from './workTags';
 import { NoFlags, Update } from './fiberFlags';
 import { updateFiberProps } from 'react-dom/src/SyntheicEvent';

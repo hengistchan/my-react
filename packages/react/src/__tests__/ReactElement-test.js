@@ -84,7 +84,7 @@ describe('ReactElement', () => {
 		const element = React.createElement(ComponentFC, {
 			key: '12',
 			ref: '34',
-			foo: '56'
+			foo: '56',
 		});
 		expect(element.type).toBe(ComponentFC);
 		expect(element.key).toBe('12');
@@ -96,7 +96,7 @@ describe('ReactElement', () => {
 		const element = React.createElement(ComponentFC, {
 			key: null,
 			ref: null,
-			foo: '12'
+			foo: '12',
 		});
 		expect(element.type).toBe(ComponentFC);
 		expect(element.key).toBe('null');
@@ -108,7 +108,7 @@ describe('ReactElement', () => {
 		const props = {
 			foo: '56',
 			key: undefined,
-			ref: undefined
+			ref: undefined,
 		};
 		const element = React.createElement(ComponentFC, props);
 		expect(element.type).toBe(ComponentFC);
@@ -127,7 +127,7 @@ describe('ReactElement', () => {
 	it('coerces the key to a string', () => {
 		const element = React.createElement(ComponentFC, {
 			key: 12,
-			foo: '56'
+			foo: '56',
 		});
 		expect(element.type).toBe(ComponentFC);
 		expect(element.key).toBe('12');
@@ -140,7 +140,7 @@ describe('ReactElement', () => {
 		const element = React.createElement(
 			ComponentFC,
 			{
-				children: 'text'
+				children: 'text',
 			},
 			a
 		);
@@ -149,7 +149,7 @@ describe('ReactElement', () => {
 
 	it('does not override children if no rest args are provided', () => {
 		const element = React.createElement(ComponentFC, {
-			children: 'text'
+			children: 'text',
 		});
 		expect(element.props.children).toBe('text');
 	});
@@ -158,7 +158,7 @@ describe('ReactElement', () => {
 		const element = React.createElement(
 			ComponentFC,
 			{
-				children: 'text'
+				children: 'text',
 			},
 			null
 		);

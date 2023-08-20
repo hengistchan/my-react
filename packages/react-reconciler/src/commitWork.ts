@@ -1,8 +1,10 @@
 import {
 	Container,
+	Instance,
 	appendChildToContainer,
 	commitUpdate,
-	removeChild
+	insertChildToContainer,
+	removeChild,
 } from 'hostConfig';
 import { FiberNode } from './fiber';
 import {
@@ -10,13 +12,13 @@ import {
 	MutationMask,
 	NoFlags,
 	Placement,
-	Update
+	Update,
 } from './fiberFlags';
 import {
 	FunctionComponent,
 	HostComponent,
 	HostRoot,
-	HostText
+	HostText,
 } from './workTags';
 
 let nextEffect: FiberNode | null = null;
@@ -148,12 +150,56 @@ const commitPlacement = (finishedWork: FiberNode) => {
 		console.log('commitPlacement', finishedWork);
 	}
 	const hostParent = getHostParent(finishedWork);
+
+	// 寻找 host sibling
+	const sibling = getHostSibling(finishedWork);
+
 	if (hostParent === null) {
 		console.warn('Expected host parent to exist', finishedWork);
 		return;
 	}
-	appendPlacementNodeIntoContainer(finishedWork, hostParent as Container);
+	insertOrAppendPlacementNodeIntoContainer(
+		finishedWork,
+		hostParent as Container,
+		sibling
+	);
 };
+
+function getHostSibling(fiber: FiberNode) {
+	let node: FiberNode = fiber;
+	findSibling: while (true) {
+		while (node.sibling === null) {
+			const parent = node.return;
+			if (
+				parent === null ||
+				parent.tag === HostComponent ||
+				parent.tag === HostRoot
+			) {
+				return null;
+			}
+			node = parent;
+		}
+
+		node.sibling.return = node.return;
+		node = node.sibling;
+		while (node?.tag !== HostText && node?.tag !== HostComponent) {
+			// 向下遍历
+			if ((node?.flags & Placement) !== NoFlags) {
+				continue findSibling;
+			}
+			if (node?.child === null) {
+				continue findSibling;
+			} else {
+				node.child.return = node;
+				node = node.child;
+			}
+		}
+
+		if ((node.flags & Placement) === NoFlags) {
+			return node.stateNode;
+		}
+	}
+}
 
 // 获取当前节点的宿主节点的父节点。在 React 中，每个组件都有一个对应的 Fiber 节点，Fiber 节点是 React 内部用来描述组件的数据结构。在 React 中，组件可以是 DOM 元素，也可以是自定义组件，而 DOM 元素和自定义组件的父节点是不同的，因此需要通过 getHostParent 函数来获取当前节点的宿主节点的父节点。在 commitPlacement 函数中，会使用 getHostParent 函数来获取当前节点的宿主节点的父节点，然后将当前节点插入到宿主节点的父节点中。
 function getHostParent(fiber: FiberNode): Container | null {
@@ -171,20 +217,25 @@ function getHostParent(fiber: FiberNode): Container | null {
 	return null;
 }
 
-function appendPlacementNodeIntoContainer(
+function insertOrAppendPlacementNodeIntoContainer(
 	finishWork: FiberNode,
-	hostContainer: Container
+	hostContainer: Container,
+	before?: Instance
 ) {
 	if (finishWork.tag === HostComponent || finishWork.tag === HostText) {
-		appendChildToContainer(hostContainer, finishWork.stateNode);
+		if (before) {
+			insertChildToContainer(hostContainer, finishWork.stateNode, before);
+		} else {
+			appendChildToContainer(hostContainer, finishWork.stateNode);
+		}
 		return;
 	}
 	const child = finishWork.child;
 	if (child !== null) {
-		appendPlacementNodeIntoContainer(child, hostContainer);
+		insertOrAppendPlacementNodeIntoContainer(child, hostContainer);
 		let sibling = child.sibling;
 		while (sibling !== null) {
-			appendPlacementNodeIntoContainer(sibling, hostContainer);
+			insertOrAppendPlacementNodeIntoContainer(sibling, hostContainer);
 			sibling = sibling.sibling;
 		}
 	}

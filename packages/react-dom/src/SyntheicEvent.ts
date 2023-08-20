@@ -96,7 +96,7 @@ function getEventCallbackNameFromEventType(): Record<
 	string[] | undefined
 > {
 	return {
-		click: ['onClickCapture', 'onClick']
+		click: ['onClickCapture', 'onClick'],
 	};
 }
 
@@ -107,7 +107,7 @@ function collectPaths(
 ) {
 	const paths: Paths = {
 		capture: [],
-		bubble: []
+		bubble: [],
 	};
 	while (targetElement && targetElement !== container) {
 		const elementProps = targetElement[elementPropsKey];

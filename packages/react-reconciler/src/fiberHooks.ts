@@ -7,7 +7,7 @@ import {
 	createUpdate,
 	createUpdateQueue,
 	enqueueUpdate,
-	processUpdateQueue
+	processUpdateQueue,
 } from './updateQueue';
 import { Action } from 'shared/ReactTypes';
 import { scheduleUpdateOnFiber } from './workLoop';
@@ -53,11 +53,11 @@ export function renderWithHooks(wip: FiberNode) {
 }
 
 const HooksDispatcherOnMount: Dispatcher = {
-	useState: mountState
+	useState: mountState,
 };
 
 const HooksDispatcherOnUpdate: Dispatcher = {
-	useState: updateState
+	useState: updateState,
 };
 
 function updateState<State>(): [State, Dispatch<State>] {
@@ -117,7 +117,7 @@ function mountWorkInProgressHook(): Hook {
 	const hook: Hook = {
 		memoizedState: null,
 		next: null,
-		updateQueue: null
+		updateQueue: null,
 	};
 
 	if (workInProgressHook === null) {
@@ -163,7 +163,7 @@ function updateWorkInProgressHook(): Hook {
 	const newHook: Hook = {
 		memoizedState: currentHook?.memoizedState,
 		updateQueue: currentHook?.updateQueue,
-		next: null
+		next: null,
 	};
 
 	if (workInProgressHook === null) {
