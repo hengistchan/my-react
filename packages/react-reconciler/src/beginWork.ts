@@ -2,6 +2,7 @@ import { ReactElementType } from 'shared/ReactTypes';
 import { FiberNode } from './fiber';
 import { UpdateQueue, processUpdateQueue } from './updateQueue';
 import {
+	Fragment,
 	FunctionComponent,
 	HostComponent,
 	HostRoot,
@@ -24,6 +25,9 @@ export const beginWork = (wip: FiberNode) => {
 		case HostText: {
 			return null;
 		}
+		case Fragment: {
+			return updateFragment(wip);
+		}
 		default: {
 			if (__DEV__) {
 				console.error('Unknown fiber tag', wip.tag);
@@ -32,6 +36,12 @@ export const beginWork = (wip: FiberNode) => {
 		}
 	}
 };
+
+function updateFragment(wip: FiberNode) {
+	const nextChildren = wip.pendingProps;
+	reconcileChildren(wip, nextChildren);
+	return wip.child;
+}
 
 function updateHostRoot(wip: FiberNode) {
 	const baseState = wip.memoizedState;

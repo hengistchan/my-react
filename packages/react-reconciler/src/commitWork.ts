@@ -72,22 +72,39 @@ const commitMutationEffectsOnFiber = (finishedWork: FiberNode) => {
 	}
 };
 
+function recordHostChildrenToDetele(
+	childrenToDelete: FiberNode[],
+	unmountFiber: FiberNode
+) {
+	// 1. 找到第一个 host root 节点
+	// 2. 每找到一个 host root 节点，判断这个节点是不是 1 中找到的兄弟节点
+	const lastOne = childrenToDelete[childrenToDelete.length - 1];
+	if (!lastOne) {
+		childrenToDelete.push(unmountFiber);
+	} else {
+		let node = lastOne.sibling;
+		while (node !== null) {
+			if (unmountFiber === node) {
+				childrenToDelete.push(unmountFiber);
+			}
+			node = node.sibling;
+		}
+	}
+}
+
 function commitDeletion(childToDelete: FiberNode) {
-	let rootHostNode: FiberNode | null = null;
+	const rootChildrenToDelete: FiberNode[] = [];
+
 	// 递归子树
 	commitNestedComponents(childToDelete, (unmountFiber) => {
 		switch (unmountFiber.tag) {
 			case HostComponent: {
-				if (rootHostNode === null) {
-					rootHostNode = unmountFiber;
-				}
+				recordHostChildrenToDetele(rootChildrenToDelete, unmountFiber);
 				// 解绑 ref
 				return;
 			}
 			case HostText: {
-				if (rootHostNode === null) {
-					rootHostNode = unmountFiber;
-				}
+				recordHostChildrenToDetele(rootChildrenToDelete, unmountFiber);
 				return;
 			}
 			case FunctionComponent: {
@@ -104,10 +121,12 @@ function commitDeletion(childToDelete: FiberNode) {
 	});
 
 	// 移除 rootHostComponent 的 DOM 节点
-	if (rootHostNode !== null) {
-		const hostParent = getHostParent(rootHostNode);
+	if (rootChildrenToDelete.length !== 0) {
+		const hostParent = getHostParent(childToDelete);
 		if (hostParent !== null) {
-			removeChild((rootHostNode as FiberNode).stateNode, hostParent);
+			rootChildrenToDelete.forEach((child) => {
+				removeChild((child as FiberNode).stateNode, hostParent);
+			});
 		}
 	}
 

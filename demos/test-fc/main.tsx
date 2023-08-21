@@ -9,7 +9,13 @@ export function App() {
 		num % 2 === 0
 			? [<li key={1}>1</li>, <li key={2}>2</li>, <li key={3}>3</li>]
 			: [<li key={3}>3</li>, <li key={2}>2</li>, <li key={1}>1</li>];
-	return <ul onClick={() => dispatch(num + 1)}>{arr}</ul>;
+	return (
+		<ul onClick={() => dispatch(num + 1)}>
+			<li>000</li>
+			{arr}
+			<li>1</li>
+		</ul>
+	);
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
