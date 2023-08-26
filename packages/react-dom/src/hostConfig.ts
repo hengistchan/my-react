@@ -52,9 +52,16 @@ export function removeChild(
 }
 
 export function insertChildToContainer(
-	child: Instance | TextInstance,
 	container: Container,
+	child: Instance | TextInstance,
 	before?: Instance | TextInstance | null
 ) {
 	container.insertBefore(child, before || null);
 }
+
+export const scheduleMicosTask =
+	typeof queueMicrotask === 'function'
+		? queueMicrotask
+		: typeof Promise === 'function'
+		? (fn: () => void) => Promise.resolve().then(fn)
+		: setTimeout;

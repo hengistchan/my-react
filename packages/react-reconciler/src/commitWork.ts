@@ -80,6 +80,7 @@ function recordHostChildrenToDetele(
 	// 2. 每找到一个 host root 节点，判断这个节点是不是 1 中找到的兄弟节点
 	const lastOne = childrenToDelete[childrenToDelete.length - 1];
 	if (!lastOne) {
+		// 第一个 host root 节点
 		childrenToDelete.push(unmountFiber);
 	} else {
 		let node = lastOne.sibling;
@@ -92,7 +93,15 @@ function recordHostChildrenToDetele(
 	}
 }
 
+// 删除一个 Fiber 节点及其子树，并从 DOM 中移除对应的节点。
 function commitDeletion(childToDelete: FiberNode) {
+	// 需要删除的根 host 节点，因为 Fragment 的关系，可能会有多个
+	/**
+	 * <>
+	 * 	<div></div>
+	 * 	<div></div>
+	 * </>
+	 */
 	const rootChildrenToDelete: FiberNode[] = [];
 
 	// 递归子树
@@ -187,6 +196,7 @@ const commitPlacement = (finishedWork: FiberNode) => {
 function getHostSibling(fiber: FiberNode) {
 	let node: FiberNode = fiber;
 	findSibling: while (true) {
+		// 寻找相同父级的下一个兄弟节点，相同父级只可能是 HostText 或 HostComponent 类型的节点。
 		while (node.sibling === null) {
 			const parent = node.return;
 			if (
