@@ -10,6 +10,7 @@ import { Container } from 'hostConfig';
 import { UpdateQueue } from './updateQueue';
 import { REACT_FRAGMENT_TYPE } from 'shared/ReactSymbols';
 import { Lane, Lanes, NoLane, NoLanes } from './fiberLanes';
+import { Effect } from './fiberHooks';
 
 export class FiberNode {
 	type: any;
@@ -70,6 +71,11 @@ export class FiberNode {
 	}
 }
 
+export interface PendingPassiveEffects {
+	unmount: Effect[];
+	update: Effect[];
+}
+
 export class FiberRootNode {
 	// 挂载的 DOM 节点
 	container: Container;
@@ -77,6 +83,7 @@ export class FiberRootNode {
 	finishedWork: FiberNode | null;
 	pendingLanes: Lanes;
 	finishedLane: Lane;
+	pendingPassiveEffects: PendingPassiveEffects;
 
 	constructor(container: Container, hostRootFiber: FiberNode) {
 		this.container = container;
@@ -85,6 +92,10 @@ export class FiberRootNode {
 		this.finishedWork = null;
 		this.pendingLanes = NoLanes;
 		this.finishedLane = NoLane;
+		this.pendingPassiveEffects = {
+			unmount: [],
+			update: [],
+		};
 	}
 }
 

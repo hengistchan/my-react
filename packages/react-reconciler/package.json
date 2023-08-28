@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "shared": "workspace:*"
+    "shared": "workspace:*",
+    "scheduler": "^0.23.0"
   },
   "peerDependencies": {
     "react": "workspace:*"
