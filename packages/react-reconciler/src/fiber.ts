@@ -11,6 +11,7 @@ import { UpdateQueue } from './updateQueue';
 import { REACT_FRAGMENT_TYPE } from 'shared/ReactSymbols';
 import { Lane, Lanes, NoLane, NoLanes } from './fiberLanes';
 import { Effect } from './fiberHooks';
+import { CallbackNode } from 'scheduler';
 
 export class FiberNode {
 	type: any;
@@ -85,6 +86,9 @@ export class FiberRootNode {
 	finishedLane: Lane;
 	pendingPassiveEffects: PendingPassiveEffects;
 
+	callbackNode: CallbackNode | null;
+	callbackPriority: Lane;
+
 	constructor(container: Container, hostRootFiber: FiberNode) {
 		this.container = container;
 		this.current = hostRootFiber;
@@ -96,6 +100,8 @@ export class FiberRootNode {
 			unmount: [],
 			update: [],
 		};
+		this.callbackNode = null;
+		this.callbackPriority = NoLane;
 	}
 }
 

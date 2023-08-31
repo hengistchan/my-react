@@ -1,0 +1,19 @@
+span {
+	word-break: break-all;
+}
+
+.priority-1 {
+	color: green;
+}
+
+.priority-2 {
+	color: rgb(0, 42, 255);
+}
+
+.priority-3 {
+	color: rgb(139, 19, 19);
+}
+
+.priority-4 {
+	color: black;
+}

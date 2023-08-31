@@ -3,6 +3,7 @@ import { FiberNode } from './fiber';
 import { Dispatcher } from 'react/src/currentDispatcher';
 import { Dispatch } from 'react/src/currentDispatcher';
 import {
+	Update,
 	UpdateQueue,
 	createUpdate,
 	createUpdateQueue,
@@ -14,6 +15,7 @@ import { scheduleUpdateOnFiber } from './workLoop';
 import { Lane, NoLane, requestUpdateLane } from './fiberLanes';
 import { Flags, PassiveEffect } from './fiberFlags';
 import { HookHasEffect, Passive } from './hookEffectTags';
+import currentBatchConfig from 'react/src/currentBatchConfig';
 
 let currentlyRenderingFiber: FiberNode | null = null;
 let workInProgressHook: Hook | null = null;
@@ -25,6 +27,8 @@ const { currentDispatcher } = internals;
 interface Hook {
 	memoizedState: any;
 	updateQueue: unknown;
+	baseState: any;
+	baseQueue: Update<any> | null;
 	next: Hook | null;
 }
 
@@ -75,12 +79,40 @@ export function renderWithHooks(wip: FiberNode, lane: Lane) {
 const HooksDispatcherOnMount: Dispatcher = {
 	useState: mountState,
 	useEffect: mountEffect,
+	useTransition: mountTransition,
 };
 
 const HooksDispatcherOnUpdate: Dispatcher = {
 	useState: updateState,
 	useEffect: updateEffect,
+	useTransition: updateTransition,
 };
+
+function mountTransition(): [boolean, (callback: () => void) => void] {
+	const [isPending, setPending] = mountState(false);
+	const hook = mountWorkInProgressHook();
+	const start = startTransition.bind(null, setPending);
+	hook.memoizedState = start;
+	return [isPending, start];
+}
+
+function updateTransition(): [boolean, (callback: () => void) => void] {
+	const [isPending] = updateState<boolean>();
+	const hook = updateWorkInProgressHook();
+	const start = hook.memoizedState;
+	return [isPending, start];
+}
+
+function startTransition(setPending: Dispatch<boolean>, callback: () => void) {
+	setPending(true);
+	const prevTransition = currentBatchConfig.transition;
+	currentBatchConfig.transition = 1;
+
+	callback();
+	setPending(false);
+
+	currentBatchConfig.transition = prevTransition;
+}
 
 // 函数组件中处理副作用，并将副作用添加到Fiber节点的副作用链表中，以便在提交阶段处理这些副作用。
 function mountEffect(create: EffectCallback, deps?: EffectDeps) {
@@ -190,16 +222,36 @@ function updateState<State>(): [State, Dispatch<State>] {
 
 	// 计算新的 state
 	const queue = hook.updateQueue as UpdateQueue<State>;
+	const baseState = hook.baseState;
 	const pending = queue.shared.pending;
-	queue.shared.pending = null;
+
+	const current = currentHook as Hook;
+	let baseQueue = current.baseQueue;
 
 	if (pending !== null) {
-		const { memoizedState } = processUpdateQueue<State>(
-			hook.memoizedState,
-			pending,
-			renderLane
-		);
+		// pending baseQueue update 保存在 current 中
+		if (baseQueue !== null) {
+			// 合并 pending 和 baseQueue
+			const baseFirst = baseQueue.next;
+			const pendingFirst = pending.next;
+			baseQueue.next = pendingFirst;
+			pending.next = baseFirst;
+		}
+
+		baseQueue = pending;
+		current.baseQueue = baseQueue;
+		queue.shared.pending = null;
+	}
+
+	if (baseQueue !== null) {
+		const {
+			memoizedState,
+			baseQueue: newBaseQueue,
+			baseState: newBaseState,
+		} = processUpdateQueue<State>(baseState, baseQueue, renderLane);
 		hook.memoizedState = memoizedState;
+		hook.baseState = newBaseState;
+		hook.baseQueue = newBaseQueue;
 	}
 
 	return [hook.memoizedState, queue.dispatch as Dispatch<State>];
@@ -220,6 +272,7 @@ function mountState<State>(
 
 	const queue = createUpdateQueue<State>();
 	hook.updateQueue = queue;
+	hook.baseState = memoizedState;
 	hook.memoizedState = memoizedState;
 
 	// @ts-ignore
@@ -245,6 +298,8 @@ function mountWorkInProgressHook(): Hook {
 		memoizedState: null,
 		next: null,
 		updateQueue: null,
+		baseState: null,
+		baseQueue: null,
 	};
 
 	if (workInProgressHook === null) {
@@ -291,6 +346,8 @@ function updateWorkInProgressHook(): Hook {
 		memoizedState: currentHook?.memoizedState,
 		updateQueue: currentHook?.updateQueue,
 		next: null,
+		baseQueue: currentHook?.baseQueue || null,
+		baseState: currentHook?.baseState || null,
 	};
 
 	if (workInProgressHook === null) {

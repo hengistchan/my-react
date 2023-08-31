@@ -1,40 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
-const Child = () => {
-	useEffect(() => {
-		console.log('child mount');
-		return () => {
-			console.log('child unmount');
-		};
-	});
-	return <h3>Child</h3>;
+const Child = ({ children }) => {
+	const now = performance.now();
+	while (performance.now() - now < 4) {
+		// busy
+	}
+	return <h3>{children}</h3>;
 };
 
 export function App() {
-	const [num, dispatch] = useState(0);
-	useEffect(() => {
-		console.log('app mount');
-		return () => {
-			console.log('app unmount');
-		};
-	}, []);
-	useEffect(() => {
-		console.log('app update', num);
-		return () => {
-			console.log('app update unmount');
-		};
-	}, [num]);
+	const [num, update] = useState(100);
 	return (
-		<div>
-			<button
-				onClick={() => {
-					dispatch(num + 1);
-				}}
-			>
-				{num === 0 ? <Child /> : 'nonoop'}
-			</button>
-		</div>
+		<ul onClick={() => update(50)}>
+			{new Array(num).fill(0).map((_, i) => (
+				<Child key={i}>{i}</Child>
+			))}
+		</ul>
 	);
 }
 
